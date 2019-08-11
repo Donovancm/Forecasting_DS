@@ -11,6 +11,8 @@ namespace Forecasting_DS.Formulas
         public float xT;
         public float cT;
         public float l;
+        public float oneStepForecastError;
+        public float forecastError;
         public float[] sT;
         public float[] bT;
         public int current;
@@ -19,7 +21,7 @@ namespace Forecasting_DS.Formulas
     public class FactorsVariables
     {
         public float alpha;
-        public float beta;
+        public float delta;
         public float gamma;
     }
 
@@ -35,25 +37,39 @@ namespace Forecasting_DS.Formulas
             return new FactorsVariables();
         }
 
+        public float ForecastErrorCalc(float xT, float oneStepError) {
+            return xT - oneStepError;
+        }
+        public float OneStepErrorCalc(float sT, float bT, float cT) {
+            return (sT + bT) * cT; 
+        }
         public float SmoothLevelCalc(SmoothingVariables levelVariables, FactorsVariables factorsVariables)
         {
-            // St = alpha * (xT/ (cT- l)) + (1 - alpha) * (sT-1 + bT-1)
-            float sT = factorsVariables.alpha * (levelVariables.xT / (levelVariables.cT - levelVariables.l)) + (1 - factorsVariables.alpha) * (levelVariables.sT[levelVariables.current - 1] + levelVariables.bT[levelVariables.current - 1]);
+            //sT-1 + Bt-1 + alpha * (forecastError/Ct)
+            levelVariables.oneStepForecastError = OneStepErrorCalc(levelVariables.sT[levelVariables.current - 1], levelVariables.bT[levelVariables.current - 1], levelVariables.cT);
+            levelVariables.forecastError = ForecastErrorCalc(levelVariables.xT, levelVariables.oneStepForecastError);
 
+            float sT = levelVariables.sT[levelVariables.current - 1] + levelVariables.bT[levelVariables.current - 1] + factorsVariables.alpha * (levelVariables.forecastError / levelVariables.cT);
             return sT;
         }
 
-        public float SmoothTrendFormulaCalc(SmoothingVariables trendVariables, FactorsVariables factorsVariables)
+        public float SmoothTrendCalc(SmoothingVariables trendVariables, FactorsVariables factorsVariables)
         {
-            // Bt = beta * (sT - ST-1) + (1 - beta) * Bt-1
-            float bT = factorsVariables.beta * (trendVariables.sT[trendVariables.current] - trendVariables.sT[trendVariables.current - 1]) + (1 - factorsVariables.beta) * trendVariables.bT[trendVariables.current - 1];
+            // Bt = bt-1 + gemma * alpha * (forecastError/ct)
+            trendVariables.oneStepForecastError = OneStepErrorCalc(trendVariables.sT[trendVariables.current - 1], trendVariables.bT[trendVariables.current - 1], trendVariables.cT);
+            trendVariables.forecastError = ForecastErrorCalc(trendVariables.xT, trendVariables.oneStepForecastError);
+
+            float bT = trendVariables.bT[trendVariables.current - 1] + factorsVariables.gamma * factorsVariables.alpha * (trendVariables.forecastError / trendVariables.cT);
             return bT;
         }
 
-        public float SmoothSeasonalFormulaCalc(SmoothingVariables seasonalVariables, FactorsVariables factorsVariables)
+        public float SmoothSeasonalCalc(SmoothingVariables seasonalVariables, FactorsVariables factorsVariables)
         {
-            // Ct = gamma * (xT / sT) + (1 - gamma) * cT - l
-            float cT = factorsVariables.gamma * (seasonalVariables.xT / seasonalVariables.sT[seasonalVariables.current]) + (1 - factorsVariables.gamma) * seasonalVariables.cT - seasonalVariables.l;
+            // Ct = cT + delta * (1 - alpha ) * ForecastError /(sT-1 + bT-1)
+            seasonalVariables.oneStepForecastError = OneStepErrorCalc(seasonalVariables.sT[seasonalVariables.current-1],seasonalVariables.bT[seasonalVariables.current-1],seasonalVariables.cT);
+            seasonalVariables.forecastError = ForecastErrorCalc(seasonalVariables.xT, seasonalVariables.oneStepForecastError);
+
+            float cT = seasonalVariables.cT + factorsVariables.delta * (1 - factorsVariables.alpha) * seasonalVariables.forecastError / (seasonalVariables.sT[seasonalVariables.current - 1] + seasonalVariables.bT[seasonalVariables.current - 1]);
             return cT;
         }
     }
