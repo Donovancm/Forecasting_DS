@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Forecasting_DS.Model;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -7,26 +8,37 @@ using System.Threading.Tasks;
 
 namespace Forecasting_DS.Reader
 {
+
+
     public class CsvReader
     {
+        enum ForcastingFormat
+        {
+            ActualDemand = 1,
+            Level = 2,
+            Trend = 3,
+            SeasonalAdjustment = 4,
+            OneStepError = 5,
+            ForecastError = 6,
+            SquaredError = 7,
+        }
 
-        public static float[,] GetData()
+        public class AddForecastingValue
+        {
+            public int index;
+            public float value;
+            public int key;
+        }
+        public static Dictionary<int, Forecasting> data;
+
+        public static Dictionary<int, Forecasting>  GetData()
         {
             // init variables
-            float[,] forecastMatrix = CreateMatrix();
-            // setup Offers Matrix = Points
-            SetupOffersMatrix(forecastMatrix);
-            return forecastMatrix;
+            data = new Dictionary<int, Forecasting>();
+            DictionaryForecast();
+            return data;
         }
-
-        public static float[,] CreateMatrix()
-        {
-            //Skip last row and last column //
-            return new float[60, 8];
-
-        }
-
-        public static void SetupOffersMatrix(float[,] matrix)
+        public static void DictionaryForecast()
         {
             List<string> list = new List<string>();
             using (StreamReader reader = new StreamReader("../../Data/HoltWintersSeasonal.csv"))
@@ -34,40 +46,94 @@ namespace Forecasting_DS.Reader
                 string line;
                 while ((line = reader.ReadLine()) != null)
                 {
-                    list.Add(line); // Add to clusterPoints.
-                    Console.WriteLine(line); // Write to console.
+                    list.Add(line); 
+                    Console.WriteLine(line); 
                 }
             }
 
             int row = 0;
-            //string[] userArray = { };
+            
             foreach (var item in list)
             {
-                // After the the first row comes forcast data
+                // After the the first row comes forecast data
                 if (row > 0)
                 {
-
-                    // set matrix of  forecast csv table
-
-                    for (int i = 0; i <= matrix.GetLength(1)-1; i++)
+                    for (int i = 1; i <= list.Count - 1; i++)
                     {
                         string[] forecastData = item.Split(',');
-                        if (forecastData[i] == "")
+                        int key = 0;
+                        int time = 0;
+                        for (int index = 0; index < forecastData.Length; index++)
                         {
-                            // if  useroffer is empty string then set 0 in matrix
-                            matrix[row - 1, i] = 0f;
-                        }
-                        else
-                        {
-                            //else useroffer is not empty then set 1 in matrix
-                            matrix[row - 1, i] = float.Parse(forecastData[i]);
-                            
+                            if (index == 0)
+                            {
+                                time = int.Parse(forecastData[index]);
+                                key = time;
+
+                                if (data.ContainsKey(time))
+                                {
+                                    AddForecastingToDictionary(data, CreateAddForecastingValue(time, ConvertToFloat(forecastData[index]), index));
+                                }
+                                else { data.Add(time, new Forecasting()); };
+                            }
+                            else
+                            {
+                                AddForecastingToDictionary(data, CreateAddForecastingValue(time, ConvertToFloat(forecastData[index]), index));
+                            }
                         }
                     }
                 }
-                // set row index to the next line/ the follow up productid of users offers
                 row++;
             }
+        }
+        
+        private static AddForecastingValue CreateAddForecastingValue(int key, float value, int index)
+        {
+            var values = new AddForecastingValue();
+            values.key = key;
+            values.value = value;
+            values.index = index;
+            return values;
+        }
+
+        private static void AddForecastingToDictionary(Dictionary<int, Forecasting> data, AddForecastingValue values)
+        {
+            //TODO duidelijk maken
+            switch (values.index)
+            {
+                case (int) ForcastingFormat.ActualDemand:
+                    data[values.key].ActualDemand = values.value; 
+                    break;
+                case (int)ForcastingFormat.Level:
+                    data[values.key].Level = values.value;
+                    break;
+                case (int)ForcastingFormat.Trend:
+                    data[values.key].Trend = values.value;
+                    break;
+                case (int)ForcastingFormat.SeasonalAdjustment:
+                    data[values.key].SeasonalAdjustment = values.value;
+                    break;
+                case (int)ForcastingFormat.OneStepError:
+                    data[values.key].OneStepForecast = values.value;
+                    break;
+                case (int)ForcastingFormat.ForecastError:
+                    data[values.key].ForecastError = values.value;
+                    break;
+                case (int)ForcastingFormat.SquaredError:
+                    data[values.key].SquaredError = values.value;
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        private static float ConvertToFloat(string value)
+        {
+            if (value == "")
+            {
+                return 0f;
+            }
+            return float.Parse(value);
         }
 
 
