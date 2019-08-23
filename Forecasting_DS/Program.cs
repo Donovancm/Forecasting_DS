@@ -16,7 +16,8 @@ namespace Forecasting_DS
             // Press Ctrl+F5 (or go to Debug > Start Without Debugging) to run your app.
             
             CsvReader.GetData();
-
+            OptimalSmoothingFactor optimalSmoothingFactor = new OptimalSmoothingFactor();
+            optimalSmoothingFactor.OptimizeFactors(CsvReader.GetData());
             // Go to http://aka.ms/dotnet-get-started-console to continue learning how to build a console app! 
         }
     }

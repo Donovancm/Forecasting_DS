@@ -42,6 +42,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Formulas\OptimalSmoothingFactor.cs" />
     <Compile Include="Formulas\SmoothingFormulas.cs" />
     <Compile Include="Model\Forecasting.cs" />
     <Compile Include="Program.cs" />

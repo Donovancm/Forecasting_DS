@@ -10,13 +10,10 @@ namespace Forecasting_DS.Formulas
     {
         public float xT;
         public float sT;
-        public float l;
+        public float lT;
+        public float tT;
         public float oneStepForecastError;
         public float forecastError;
-        public float[] lT;
-        public float[] tT;
-        public float[] t;
-        public int current;
     }
 
     public class FactorsVariables
@@ -57,41 +54,47 @@ namespace Forecasting_DS.Formulas
         public float OneStepErrorCalc(float lT, float tT, float sT) {
             return (lT + tT) * sT; 
         }
+
+        public float SquardErrorCalc(float forecastError)
+        {
+            return float.Parse(Math.Pow(Double.Parse(forecastError.ToString()), 2).ToString());
+        }
+
         public float SmoothLevelCalc(SmoothingVariables levelVariables, FactorsVariables factorsVariables)
         {
             //lT-1 + Bt-1 + alpha * (forecastError/Ct)
-            levelVariables.oneStepForecastError = OneStepErrorCalc(levelVariables.lT[levelVariables.current - 1], levelVariables.tT[levelVariables.current - 1], levelVariables.sT);
-            levelVariables.forecastError = ForecastErrorCalc(levelVariables.xT, levelVariables.oneStepForecastError);
+            //levelVariables.oneStepForecastError = OneStepErrorCalc(levelVariables.lT, levelVariables.tT, levelVariables.sT);
+            //levelVariables.forecastError = ForecastErrorCalc(levelVariables.xT, levelVariables.oneStepForecastError);
 
-            float lT = levelVariables.lT[levelVariables.current - 1] + levelVariables.tT[levelVariables.current - 1] + factorsVariables.alpha * (levelVariables.forecastError / levelVariables.sT);
+            float lT = levelVariables.lT + levelVariables.tT + factorsVariables.alpha * (levelVariables.forecastError / levelVariables.sT);
             return lT;
         }
 
         public float SmoothTrendCalc(SmoothingVariables trendVariables, FactorsVariables factorsVariables)
         {
             // Bt = bt-1 + gemma * alpha * (forecastError/ct)
-            trendVariables.oneStepForecastError = OneStepErrorCalc(trendVariables.lT[trendVariables.current - 1], trendVariables.tT[trendVariables.current - 1], trendVariables.sT);
-            trendVariables.forecastError = ForecastErrorCalc(trendVariables.xT, trendVariables.oneStepForecastError);
+            //trendVariables.oneStepForecastError = OneStepErrorCalc(trendVariables.lT, trendVariables.tT, trendVariables.sT);
+            //trendVariables.forecastError = ForecastErrorCalc(trendVariables.xT, trendVariables.oneStepForecastError);
 
-            float tT = trendVariables.tT[trendVariables.current - 1] + factorsVariables.gamma * factorsVariables.alpha * (trendVariables.forecastError / trendVariables.sT);
+            float tT = trendVariables.tT + factorsVariables.gamma * factorsVariables.alpha * (trendVariables.forecastError / trendVariables.sT);
             return tT;
         }
 
         public float SmoothSeasonalCalc(SmoothingVariables seasonalVariables, FactorsVariables factorsVariables)
         {
             // Ct = sT + delta * (1 - alpha ) * ForecastError /(lT-1 + tT-1)
-            seasonalVariables.oneStepForecastError = OneStepErrorCalc(seasonalVariables.lT[seasonalVariables.current-1],seasonalVariables.tT[seasonalVariables.current-1],seasonalVariables.sT);
-            seasonalVariables.forecastError = ForecastErrorCalc(seasonalVariables.xT, seasonalVariables.oneStepForecastError);
+           // seasonalVariables.oneStepForecastError = OneStepErrorCalc(seasonalVariables.lT,seasonalVariables.tT,seasonalVariables.sT);
+           // seasonalVariables.forecastError = ForecastErrorCalc(seasonalVariables.xT, seasonalVariables.oneStepForecastError);
 
-            float sT = seasonalVariables.sT + factorsVariables.delta * (1 - factorsVariables.alpha) * seasonalVariables.forecastError / (seasonalVariables.lT[seasonalVariables.current - 1] + seasonalVariables.tT[seasonalVariables.current - 1]);
+            float sT = seasonalVariables.sT + factorsVariables.delta * (1 - factorsVariables.alpha) * seasonalVariables.forecastError / (seasonalVariables.lT + seasonalVariables.tT);
             return sT;
         }
-        public float Prediction(SmoothingVariables smoothVariables, PredictionVariables predictionVariables, FactorsVariables factorsVariables)
-        {
-            //(lT-1 + (t.current - t-1) * Tt-1 ) * S(vorige 12 maanden)
+        //public float Prediction(SmoothingVariables smoothVariables, PredictionVariables predictionVariables, FactorsVariables factorsVariables)
+        //{
+        //    //(lT-1 + (t.current - t-1) * Tt-1 ) * S(vorige 12 maanden)
 
-            float prediction = predictionVariables.lTLock + ((smoothVariables.t[smoothVariables.current] - predictionVariables.t) * smoothVariables.tT[smoothVariables.current - 1]) * predictionVariables.sT[12 - 12];
-            return prediction;
-        }
+        //    //float prediction = predictionVariables.lTLock + ((smoothVariables.t[smoothVariables.current] - predictionVariables.t) * smoothVariables.tT) * predictionVariables.sT[12 - 12];
+        //    return prediction;
+        // }
     }
 }
