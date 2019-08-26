@@ -34,6 +34,9 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Windows.Forms.DataVisualization" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -44,6 +47,12 @@
   <ItemGroup>
     <Compile Include="Formulas\OptimalSmoothingFactor.cs" />
     <Compile Include="Formulas\SmoothingFormulas.cs" />
+    <Compile Include="Graph\ForecastForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Graph\ForecastForm.Designer.cs">
+      <DependentUpon>ForecastForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="Model\Forecasting.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -52,6 +61,11 @@
   <ItemGroup>
     <None Include="App.config" />
     <None Include="Data\HoltWintersSeasonal.csv" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Graph\ForecastForm.resx">
+      <DependentUpon>ForecastForm.cs</DependentUpon>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -13,12 +13,12 @@ namespace Forecasting_DS.Formulas
         float bestAlpha = float.MaxValue;
         float bestBeta = float.MaxValue;
         float bestGamma = float.MaxValue;
-        float alpha = float.MaxValue;
-        float beta = float.MaxValue;
-        float gamma = float.MaxValue;
+        float alpha = 0f;
+        float beta = 0f;
+        float gamma = 0f;
         float stepValue = 0.1f;
         //SSEbewaar=MAXINT
-        public void OptimizeFactors(Dictionary<int, Forecasting> data)
+        public Dictionary<int, Forecasting> OptimizeFactors(Dictionary<int, Forecasting> data)
         {
             
             for (float a = 0; a <= 1; a = a + stepValue)
@@ -46,11 +46,11 @@ namespace Forecasting_DS.Formulas
             }
 
             float newStepValue = stepValue / 10;
-            for (float a = (bestAlpha - stepValue); a <= (bestAlpha + stepValue); a = a + newStepValue)
+            for (float a = bestAlpha  ; a <= (bestAlpha + stepValue); a = a + newStepValue)
             {
-                for (float b = (bestBeta - stepValue); b <= (bestBeta + stepValue); b = b + newStepValue)
+                for (float b = bestBeta ; b <= (bestBeta + stepValue); b = b + newStepValue)
                 {
-                    for (float c = (bestGamma - stepValue); c <= (bestGamma + stepValue); c = c + newStepValue)
+                    for (float c = bestGamma ; c <= (bestGamma + stepValue); c = c + newStepValue)
                     {
                         alpha = a;
                         beta = b;
@@ -69,18 +69,24 @@ namespace Forecasting_DS.Formulas
                 }
 
             }
-
+            return data;
         }
 
         private float CalculateSSE(Dictionary<int, Forecasting> data)
         {
             float sse = 0f;
+            float length = 0;
             foreach (var item in data)
             {
-                sse = sse + item.Value.SquaredError;
+                if (item.Value.SquaredError >0)
+                {
+                    length++;
+                    sse = sse + item.Value.SquaredError;
+                }
+                
             }
-           
-            return sse;
+            //Math.Sqrt(squaredDistance / (sse.Length - 3))
+            return float.Parse(Math.Sqrt(double.Parse(sse.ToString()) / length).ToString());
         }
 
         private void ImproveSmoothingFactor(Dictionary<int, Forecasting> data)
