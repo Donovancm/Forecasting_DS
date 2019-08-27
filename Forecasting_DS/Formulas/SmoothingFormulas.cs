@@ -26,8 +26,10 @@ namespace Forecasting_DS.Formulas
     public class PredictionVariables
     {
         public float t;
+        public float tLock;
         public float lTLock;
-        public float[] sT;
+        public float tTLock;
+        public float sT;
 
     }
 
@@ -89,12 +91,13 @@ namespace Forecasting_DS.Formulas
             float sT = seasonalVariables.sT + factorsVariables.delta * (1 - factorsVariables.alpha) * seasonalVariables.forecastError / (seasonalVariables.lT + seasonalVariables.tT);
             return sT;
         }
-        //public float Prediction(SmoothingVariables smoothVariables, PredictionVariables predictionVariables, FactorsVariables factorsVariables)
-        //{
-        //    //(lT-1 + (t.current - t-1) * Tt-1 ) * S(vorige 12 maanden)
+        public float Prediction(PredictionVariables predictionVariables, FactorsVariables factorsVariables)
+        {
+            //(lT - 1 + (t.current - t - 1) * Tt - 1) * S(vorige 12 maanden);
+            //---->($LevelsmoothingBekend + (PredictionT - $lastbekendeTijd) * $LastbekendeTrend) *-12Seasonal
 
-        //    //float prediction = predictionVariables.lTLock + ((smoothVariables.t[smoothVariables.current] - predictionVariables.t) * smoothVariables.tT) * predictionVariables.sT[12 - 12];
-        //    return prediction;
-        // }
+            float prediction = (predictionVariables.lTLock + (predictionVariables.t - predictionVariables.tLock) * predictionVariables.tTLock) * predictionVariables.sT;
+            return prediction;
+        }
     }
 }

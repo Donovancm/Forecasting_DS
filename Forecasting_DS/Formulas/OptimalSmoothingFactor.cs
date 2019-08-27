@@ -63,12 +63,16 @@ namespace Forecasting_DS.Formulas
                             bestAlpha = a;
                             bestBeta = b;
                             bestGamma = c;
-
                         }
                     }
                 }
 
             }
+            alpha = bestAlpha;
+            beta = bestBeta;
+            gamma = bestGamma;
+            ImproveSmoothingFactor(data);
+            AddOptimizePrediction(data);
             return data;
         }
 
@@ -94,7 +98,7 @@ namespace Forecasting_DS.Formulas
             var formulas = new SmoothingFormulas();
             FactorsVariables newFactorsVariables = new FactorsVariables();
             newFactorsVariables.alpha = alpha;
-            newFactorsVariables.delta = beta;
+            newFactorsVariables.delta = beta ;
             newFactorsVariables.gamma = gamma;
 
             SmoothingVariables newSmoothingVariables = new SmoothingVariables();
@@ -142,6 +146,34 @@ namespace Forecasting_DS.Formulas
                     newSmoothingVariables.tT = item.Value.Trend = formulas.SmoothTrendCalc(newSmoothingVariables, newFactorsVariables);
                     newSmoothingVariables.sT = item.Value.SeasonalAdjustment = formulas.SmoothSeasonalCalc(newSmoothingVariables, newFactorsVariables);
                     key++;
+                }
+            }
+        }
+
+        private void AddOptimizePrediction(Dictionary<int, Forecasting> data)
+        {
+            var preditionValue = new PredictionVariables();
+            var predictionCalc = new SmoothingFormulas();
+            var factorValues = new FactorsVariables();
+            factorValues.alpha = bestAlpha;
+            factorValues.delta = bestBeta;
+            factorValues.gamma = bestGamma;
+            foreach (var item in data)
+            {
+                int timeValue = item.Key;
+           
+                if (timeValue == 36)
+                {
+                    preditionValue.tLock = item.Key;
+                    preditionValue.tTLock = item.Value.Trend;
+                    preditionValue.lTLock = item.Value.Level;
+                }
+                else if(timeValue > 36)
+                {
+                    preditionValue.t = timeValue;
+                    preditionValue.sT = data[int.Parse(timeValue.ToString()) - 12].SeasonalAdjustment;
+                    Console.WriteLine("predCalc: " + predictionCalc.Prediction(preditionValue, factorValues));
+                    data[int.Parse(timeValue.ToString())].ActualDemand = predictionCalc.Prediction(preditionValue,factorValues);
                 }
             }
         }
