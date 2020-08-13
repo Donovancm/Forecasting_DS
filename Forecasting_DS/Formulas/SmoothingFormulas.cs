@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace Forecasting_DS.Formulas
 {
+    /// <summary>
+    /// Hier zijn de variablemodels om het in de methodes en formules te kunnen hergebruiken.
+    /// </summary>
     public class SmoothingVariables
     {
         public float xT;

@@ -13,11 +13,18 @@ namespace Forecasting_DS.Formulas
         float bestAlpha = float.MaxValue;
         float bestBeta = float.MaxValue;
         float bestGamma = float.MaxValue;
+
         float alpha = 0f;
         float beta = 0f;
         float gamma = 0f;
         float stepValue = 0.1f;
-        //SSEbewaar=MAXINT
+
+
+        /// <summary>
+        /// Methode om de beste alpha, beta en gamma te bepalen
+        /// </summary>
+        /// <param name="data">Lijst van Maand waarbij de forecasting data wordt opgeslagen</param>
+        /// <returns>Lijst van Forecasting data </returns>
         public Dictionary<int, Forecasting> OptimizeFactors(Dictionary<int, Forecasting> data)
         {
             
@@ -73,9 +80,22 @@ namespace Forecasting_DS.Formulas
             gamma = bestGamma;
             ImproveSmoothingFactor(data);
             AddOptimizePrediction(data);
+
+            //Bekijken van meest optimale Alpha/Beta/Gamma/SSE
+            Console.WriteLine("The most optimal Alpha is " + alpha);
+            Console.WriteLine("The most optimal Beta is " + beta);
+            Console.WriteLine("The most optimal Gamma is " + gamma);
+
+            Console.WriteLine("The most optimal SSE is " + containSSE);
+
             return data;
         }
 
+        /// <summary>
+        /// Bereken per maand de SSE
+        /// </summary>
+        /// <param name="data">>Lijst van Maand waarbij de forecasting data wordt opgeslagen</param>
+        /// <returns>SSE in float</returns>
         private float CalculateSSE(Dictionary<int, Forecasting> data)
         {
             float sse = 0f;
@@ -89,10 +109,13 @@ namespace Forecasting_DS.Formulas
                 }
                 
             }
-            //Math.Sqrt(squaredDistance / (sse.Length - 3))
             return float.Parse(Math.Sqrt(double.Parse(sse.ToString()) / length).ToString());
         }
 
+        /// <summary>
+        /// Vullen kolommen van Forecasting volgens de formules
+        /// </summary>
+        /// <param name="data">Lijst van Maand waarbij de forecasting data wordt opgeslagen</param>
         private void ImproveSmoothingFactor(Dictionary<int, Forecasting> data)
         {
             var formulas = new SmoothingFormulas();
@@ -150,6 +173,10 @@ namespace Forecasting_DS.Formulas
             }
         }
 
+        /// <summary>
+        /// Aan de hand van de ingevulde kolommen van ImproveSmoothingFactor de prediction berekenen.
+        /// </summary>
+        /// <param name="data">Lijst van Maand waarbij de forecasting data wordt opgeslagen</param>
         private void AddOptimizePrediction(Dictionary<int, Forecasting> data)
         {
             var preditionValue = new PredictionVariables();
@@ -172,7 +199,7 @@ namespace Forecasting_DS.Formulas
                 {
                     preditionValue.t = timeValue;
                     preditionValue.sT = data[int.Parse(timeValue.ToString()) - 12].SeasonalAdjustment;
-                    Console.WriteLine("predCalc: " + predictionCalc.Prediction(preditionValue, factorValues));
+                    Console.WriteLine("Month: "+ timeValue +", "+ "Predicted Demand Value: " + predictionCalc.Prediction(preditionValue, factorValues));
                     data[int.Parse(timeValue.ToString())].ActualDemand = predictionCalc.Prediction(preditionValue,factorValues);
                 }
             }

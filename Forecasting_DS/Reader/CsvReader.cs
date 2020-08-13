@@ -47,7 +47,6 @@ namespace Forecasting_DS.Reader
                 while ((line = reader.ReadLine()) != null)
                 {
                     list.Add(line); 
-                    Console.WriteLine(line); 
                 }
             }
 
@@ -87,6 +86,13 @@ namespace Forecasting_DS.Reader
             }
         }
         
+        /// <summary>
+        /// Creatie van AddForecastingValue
+        /// </summary>
+        /// <param name="key">Tijd</param>
+        /// <param name="value">Forecastingwaarde</param>
+        /// <param name="index">ForecastingFormat X</param>
+        /// <returns>AddForecastingValue</returns>
         private static AddForecastingValue CreateAddForecastingValue(int key, float value, int index)
         {
             var values = new AddForecastingValue();
@@ -96,6 +102,11 @@ namespace Forecasting_DS.Reader
             return values;
         }
 
+        /// <summary>
+        /// Correct plaatsen van de AddForecastingValues
+        /// </summary>
+        /// <param name="data">Lijst van Maand waarbij de forecasting data wordt opgeslagen</param>
+        /// <param name="values">Forecasting Values</param>
         private static void AddForecastingToDictionary(Dictionary<int, Forecasting> data, AddForecastingValue values)
         {
             //TODO duidelijk maken
